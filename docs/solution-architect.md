@@ -133,6 +133,18 @@ Examples:
 
 ---
 
+## Principle 8: Configurable Before Custom
+
+The platform shall prioritize configuration through metadata.
+
+Custom Python extensions shall only be introduced when requirements cannot reasonably be satisfied through metadata alone.
+
+Configuration should solve most business use cases.
+
+Extension points should be used only when necessary.
+
+---
+
 # Platform Capabilities
 
 The platform is composed of three primary capability domains.
@@ -152,6 +164,7 @@ Capabilities include:
 - Attachments
 - Participant Management
 - Access Management
+- Notifications
 
 This domain represents the core business capability of the platform.
 
@@ -171,6 +184,8 @@ Capabilities include:
 - Lifecycle Configuration
 
 The Metadata Domain enables low-code extensibility and Business Analyst empowerment.
+
+Lifecycle definitions belong to this domain and are configurable per Case Type.
 
 ---
 
@@ -243,7 +258,8 @@ Workflow execution remains delegated to an external workflow engine.
 - Search
 - Audit Trail
 - Metadata Configuration
-- Case Lifecycle
+- Case Lifecycle Definitions
+- Notifications
 
 ---
 
@@ -271,6 +287,7 @@ Metadata may define:
 - Validation Rules
 - Search Experiences
 - Workflow Mappings
+- Lifecycle Definitions
 
 Changes to metadata should require minimal or no application code changes.
 
@@ -295,6 +312,33 @@ Future adapters may include:
 
 ---
 
+# Workflow Mapping Strategy
+
+Workflow mappings shall be metadata-driven by default.
+
+Supported configuration includes:
+
+- Process Key
+- Variable Mappings
+- Start Strategy
+- Workflow Parameters
+
+For advanced scenarios, optional Python extension points may be configured.
+
+Examples:
+
+- External System Integration
+- Dynamic Variable Construction
+- Complex Business Rules
+- Data Enrichment
+- Advanced Validation
+
+Architecture Principle:
+
+Metadata First + Optional Extension Points
+
+---
+
 # Localization Architecture
 
 The platform shall support multilingual operation.
@@ -315,6 +359,8 @@ Examples:
 - Statuses
 - Validation Messages
 - Notifications
+- Search Definitions
+- Form Definitions
 
 ---
 
@@ -341,6 +387,7 @@ The following constraints shall be enforced:
 - Metadata is the preferred extension mechanism.
 - Business terminology must remain workflow-agnostic.
 - Case visibility must be managed by the platform.
+- Workflow engines must only be accessed through Workflow Adapters.
 
 ---
 
@@ -355,6 +402,8 @@ Foundation Platform
 - Search
 - Audit
 - Attachments
+- Access Control
+- Notifications
 - CIBSeven Adapter
 
 ---
@@ -367,6 +416,7 @@ Business Configuration Platform
 - Search Designer
 - Workflow Mapping Designer
 - Notification Templates
+- Lifecycle Designer
 
 ---
 
@@ -386,3 +436,18 @@ Digital Workplace
 # Architecture Status
 
 Status: Approved Architecture Baseline v1.0
+
+Frozen Decisions:
+
+- FastAPI
+- Jinja2
+- HTMX
+- PostgreSQL
+- JSON Forms
+- Metadata-Driven Architecture
+- Workflow Adapter Layer
+- CIBSeven Initial Adapter
+- Case Registry as System of Record
+- Lifecycle Definitions in Metadata Domain
+- Notifications as a Supporting Capability
+- Metadata First + Optional Python Extension Points
