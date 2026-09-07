@@ -69,6 +69,31 @@ Users should be able to start with a simple search and progressively narrow the 
 
 ---
 
+## Principle 6: Search Returns Cases
+
+The primary search result of the platform shall be Cases.
+
+Users search for cases and navigate to related information through the case details view.
+
+Search results shall not directly return:
+
+- Activities
+- Attachments
+- Comments
+- Workflow Artifacts
+
+Related information may be accessed after opening an authorized case.
+
+Rationale:
+
+- Simpler user experience
+- Simpler authorization model
+- Simpler search implementation
+- Better performance
+- Consistent business terminology
+  
+---
+
 # Search Types
 
 ## Global Search
