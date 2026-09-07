@@ -914,6 +914,7 @@ Using metadata alone, authorized Business Analysts and Administrators should be 
 10. Validation Rules
 11. REST Integrations
 12. Access Rules
+13. UI Behavior Rules
 
 without creating new application code.
 
