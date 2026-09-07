@@ -2,6 +2,8 @@
 
 # Case Management Registry (CMR)
 
+Status: APPROVED BASELINE v1.1
+
 ## Document Purpose
 
 This document defines the business requirements, objectives, scope, and success criteria for the Case Management Registry (CMR).
@@ -121,8 +123,6 @@ Primary Search Criteria:
 ---
 
 ## Organization Cases
-
-Examples:
 
 ### Commercial Organizations
 
@@ -289,6 +289,7 @@ The platform shall support configuration of:
 - Workflow Mappings
 - Validation Rules
 - Lifecycle Definitions
+- UI Behavior Rules
 
 through metadata.
 
@@ -393,6 +394,7 @@ The following items are excluded from the initial phase:
 - Organization 360 View
 - Advanced Analytics
 - AI Capabilities
+- Field-Level Security
 
 These may be considered in future phases.
 
@@ -419,3 +421,10 @@ The platform shall be considered successful when:
 - JSON Forms are used for dynamic form rendering.
 - CIBSeven is the initial workflow engine implementation.
 - Future workflow engines may be integrated through adapters.
+- Workflow interactions occur through the Workflow Adapter Layer.
+
+---
+
+# Product Status
+
+Status: APPROVED BASELINE v1.1
