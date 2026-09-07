@@ -2,7 +2,7 @@
 
 # Case Management Registry (CMR)
 
-Status: APPROVED FOUNDATION v1.0
+Status: APPROVED FOUNDATION v1.2
 
 ---
 
@@ -20,11 +20,12 @@ The metadata model drives:
 - Forms
 - Multi-Step Forms
 - Search Screens
-- Detail Screens
+- Detail Pages
+- Activity Screens
 - Validation Rules
 - Lifecycle Definitions
-- Localization
-- Workflow Mappings
+- Internationalization
+- Workflow Bindings
 - Workflow Events
 - Access Rules
 - Dashboard Widgets
@@ -35,11 +36,11 @@ The metadata model drives:
 
 ## Single Source of Truth
 
-A business object definition shall drive:
+A business object definition must drive:
 
 - Data Model
 - User Interface
-- Search Experience
+- Search Behavior
 - Workflow Integration
 - Lifecycle Behavior
 - Reporting Experience
@@ -48,7 +49,7 @@ A business object definition shall drive:
 
 ## Configuration Over Coding
 
-New business capabilities should be introduced through metadata whenever possible.
+New case types should be created using metadata whenever possible.
 
 Custom development should only be required when metadata cannot reasonably satisfy business requirements.
 
@@ -56,7 +57,7 @@ Custom development should only be required when metadata cannot reasonably satis
 
 ## Engine Independence
 
-Metadata shall remain independent from any specific workflow engine.
+Metadata shall not depend on any specific BPM vendor.
 
 Workflow integration shall occur through the Workflow Adapter Layer.
 
@@ -77,35 +78,56 @@ Future Implementations:
 
 Configuration should solve the majority of business requirements.
 
-Extension points should only be used when configuration alone is insufficient.
+Extension points should only be used when metadata alone is insufficient.
 
 ---
 
 ## Versioned Configuration
 
-Metadata definitions must support versioning.
+Metadata definitions shall support versioning.
 
 Changes to metadata shall not impact previously created cases.
 
-Existing cases shall remain linked to the metadata version used at creation time.
+Historical cases must continue to operate using the metadata version active at creation time.
 
 ---
 
-## Localization Ready
+## Hybrid Localization Strategy
 
-All user-facing metadata shall support multilingual values.
+The platform shall implement a hybrid localization model.
 
-Initial Supported Languages:
+### Application Localization
 
-- Arabic
-- English
+Application translations shall be stored in translation files maintained under source control.
 
-The platform shall automatically support:
+Examples:
 
-- RTL languages
-- LTR languages
+- Save
+- Cancel
+- Search
+- Login
+- Dashboard
+- Administration
 
-based on the active language.
+### Metadata Localization
+
+Metadata-driven translations shall be stored directly within metadata definitions.
+
+Examples:
+
+- Case Types
+- Form Labels
+- Search Labels
+- Lifecycle States
+- Status Names
+- Notification Templates
+- Activity Names
+
+This enables:
+
+- Business Analysts to manage business terminology
+- Developers to manage platform terminology
+- Independent deployment of platform and business configuration changes
 
 ---
 
@@ -113,7 +135,7 @@ based on the active language.
 
 ## Entity Definition
 
-Defines the underlying business object.
+Defines the business object.
 
 Example:
 
@@ -121,8 +143,8 @@ Example:
 {
   "id": "change-request",
   "name": "Change Request",
-  "version": 1,
-  "category": "Administrative"
+  "category": "Administrative",
+  "version": 1
 }
 ```
 
@@ -193,17 +215,17 @@ Supported Field Types:
 - department
 - email
 - phone
-- url
 - richtext
 - attachment
+- url
 
-Additional field types may be added in future releases.
+Additional field types may be introduced in future releases.
 
 ---
 
 ## Form Definition
 
-Defines data-entry screens.
+Defines data entry screens.
 
 Example:
 
@@ -220,7 +242,7 @@ Capabilities:
 - Tabs
 - Conditional Visibility
 - Conditional Validation
-- Read-Only Rules
+- Read Only Rules
 - Dynamic Hyperlinks
 - Attachment Uploads
 
@@ -236,7 +258,7 @@ Example:
 {
   "steps": [
     {
-      "id": "request-info",
+      "id": "request-information",
       "title": "Request Information"
     },
     {
@@ -253,13 +275,13 @@ Example:
 
 Capabilities:
 
-- Next / Previous Navigation
+- Previous / Next Navigation
 - Save Draft
 - Resume Later
 - Conditional Step Visibility
 - Step Validation
+- Step Completion Indicators
 - Review Screen
-- Completion Indicators
 
 ---
 
@@ -267,17 +289,36 @@ Capabilities:
 
 A Case Type may define multiple forms.
 
+Supported Form Types:
+
+- Create Form
+- Edit Form
+- View Form
+- Activity Form
+- Closure Form
+
 Examples:
+
+Complaint
+
+```text
+Create Form
+View Form
+Activity Form
+Closure Form
+```
+
+Change Request
 
 ```text
 Create Form
 Edit Form
-View Form
+Technical Review Activity Form
+CAB Activity Form
 Closure Form
-Activity Form
 ```
 
-This allows different user experiences across the case lifecycle.
+This enables different user experiences throughout the lifecycle of a case.
 
 ---
 
@@ -301,14 +342,14 @@ Example:
 Capabilities:
 
 - Searchable Fields
-- Search Filters
 - Sortable Fields
-- Result Columns
 - Export Fields
+- Default Filters
 - Saved Searches
+- Result Columns
 - Default Sorting
 
-Must align with the Search Requirements document.
+Search definitions must align with the Search Requirements document.
 
 ---
 
@@ -327,15 +368,17 @@ Capabilities:
 - Current Stage
 - Current Status
 
-The Detail View is the primary destination after a search result is opened.
+The Detail View is the primary destination after opening a search result.
 
 ---
 
 ## Lifecycle Definition
 
-Defines business lifecycle behavior.
+Lifecycle Definitions are metadata-driven.
 
-Examples:
+Different Case Types may have different lifecycle models.
+
+Example:
 
 Complaint Lifecycle
 
@@ -360,15 +403,14 @@ Draft
 
 Capabilities:
 
-- Lifecycle States
-- Stage Names
-- Transition Rules
-- Default State
+- States
+- Stages
+- Transitions
+- Display Labels
+- Default States
 - Completion States
 
-Lifecycle definitions are metadata-driven.
-
-Lifecycle behavior shall not be hardcoded.
+Lifecycle behavior shall not be hardcoded into the platform.
 
 ---
 
@@ -394,12 +436,34 @@ Capabilities:
 - Decision Mapping
 - Status Synchronization
 - Event Handling
+- Workflow Adapter Selection
+
+---
+
+## Workflow Adapter Architecture
+
+Metadata shall remain independent from workflow engine implementations.
+
+Workflow integration shall occur through the Workflow Adapter Layer.
+
+Current Implementation:
+
+- CIBSeven Adapter
+
+Future Implementations:
+
+- Camunda Adapter
+- Flowable Adapter
+- jBPM Adapter
+- Custom Workflow Adapters
+
+The metadata model should avoid workflow-engine-specific constructs wherever possible.
 
 ---
 
 ## Workflow Extension Points
 
-For advanced integrations metadata may reference optional Python handlers.
+For advanced requirements metadata may reference optional Python handlers.
 
 Examples:
 
@@ -409,23 +473,37 @@ Examples:
 - Eligibility Validation
 - Advanced Business Rules
 
+Example:
+
+```json
+{
+  "handler": "ComplaintWorkflowHandler"
+}
+```
+
 Principle:
 
-Metadata First + Optional Extension Points
+```text
+Metadata First
++
+Optional Extension Points
+```
 
 ---
 
-## Dynamic Business Rules
+## Dynamic Business Rules via REST APIs
 
-Business rules may be executed through REST integrations.
+Business rules shall be executable through REST integrations.
 
 Supported use cases:
 
 - Validation
-- Visibility Rules
-- Eligibility Checks
+- Dynamic Visibility
+- Dynamic Read-Only Rules
+- Dynamic Dropdown Values
+- Dynamic Hyperlinks
 - Business Calculations
-- Read-Only Rules
+- Eligibility Checks
 
 Example:
 
@@ -440,9 +518,34 @@ Example:
 
 ---
 
+## Dynamic Field Validation
+
+Supported validation types:
+
+- Required
+- Pattern
+- Length
+- Range
+- Cross-Field Validation
+- Remote Validation
+
+Example:
+
+```json
+{
+  "field": "employeeNumber",
+  "validation": {
+    "type": "rest",
+    "endpoint": "/api/employees/validate"
+  }
+}
+```
+
+---
+
 ## Dynamic Dropdowns
 
-Dropdown values may be loaded from REST services.
+Dropdown values may be loaded from REST APIs.
 
 Example:
 
@@ -458,22 +561,35 @@ Example:
 
 ---
 
-## Dynamic Visibility
+## Conditional Visibility
 
-Visibility behavior may be driven by:
-
-- Field Values
-- Metadata Rules
-- REST Integrations
+Visibility rules may invoke backend services.
 
 Example:
 
 ```json
 {
+  "field": "budgetAmount",
   "visibility": {
     "type": "rest",
-    "endpoint": "/api/rules/show-budget-field"
+    "endpoint": "/api/rules/visibility"
   }
+}
+```
+
+---
+
+## Dynamic Hyperlinks
+
+Hyperlinks may be generated from REST responses.
+
+Example:
+
+```json
+{
+  "field": "requestLink",
+  "type": "url",
+  "source": "/api/request/link"
 }
 ```
 
@@ -508,7 +624,29 @@ Events may trigger:
 
 ## Localization Model
 
-All labels shall support localization.
+The platform shall support multilingual operation.
+
+Initial supported languages:
+
+- Arabic
+- English
+
+Additional languages shall be supported without schema changes.
+
+The platform shall automatically adapt to:
+
+- RTL Languages
+- LTR Languages
+
+based on the active language.
+
+### Application Localization
+
+Application translations shall be maintained in translation files.
+
+### Metadata Localization
+
+Metadata-driven values shall be stored directly in metadata.
 
 Example:
 
@@ -524,18 +662,43 @@ Example:
 Supported Localization Targets:
 
 - Labels
-- Field Descriptions
+- Descriptions
 - Help Text
 - Validation Messages
 - Status Names
+- Lifecycle States
 - Search Labels
 - Notification Templates
+- Workflow Activity Names
+
+---
+
+## Localization Definition
+
+A metadata object may define multilingual values directly.
+
+Example:
+
+```json
+{
+  "name": {
+    "en": "Change Request",
+    "ar": "طلب تغيير"
+  }
+}
+```
+
+The platform shall resolve the appropriate value using the active user language.
+
+Optional fallback rules may be configured when translations are unavailable.
 
 ---
 
 ## Security Metadata
 
-Metadata may define:
+Security is metadata driven.
+
+Capabilities:
 
 - Case Visibility Rules
 - Access Assignment Rules
@@ -543,7 +706,16 @@ Metadata may define:
 - Role Mappings
 - Activity Visibility Rules
 
-Field-Level Security is not part of Phase 1 and shall not be modelled in metadata.
+Field-Level Security is not part of Phase 1.
+
+Security enforcement occurs at the Case level.
+
+Future compliance requirements may introduce:
+
+- Field-Level Security
+- Data Masking
+- ABAC
+- GDPR Controls
 
 ---
 
@@ -551,7 +723,7 @@ Field-Level Security is not part of Phase 1 and shall not be modelled in metadat
 
 Metadata definitions shall support lifecycle management.
 
-Suggested Lifecycle:
+Lifecycle:
 
 ```text
 Draft
@@ -559,6 +731,42 @@ Draft
 → Approved
 → Published
 → Retired
+```
+
+Only Published metadata may be used by production cases.
+
+---
+
+# Metadata Versioning
+
+Versioning applies to:
+
+- Entity Definitions
+- Field Definitions
+- Form Definitions
+- Detail View Definitions
+- Search Definitions
+- Workflow Mappings
+- Lifecycle Definitions
+
+Business Rules:
+
+- Existing cases remain linked to their original metadata version.
+- New cases use the currently active metadata version.
+- Multiple versions may coexist.
+- Historical metadata must remain available for audit purposes.
+
+Example:
+
+```text
+Complaint Form v1
+→ Case #100
+
+Complaint Form v2
+→ Case #101
+
+Case #100 continues using v1.
+Case #101 uses v2.
 ```
 
 ---
@@ -607,7 +815,7 @@ without creating new application code.
 
 # Metadata Model Status
 
-Status: APPROVED FOUNDATION v1.0
+Status: APPROVED FOUNDATION v1.2
 
 This document serves as the foundation for:
 
