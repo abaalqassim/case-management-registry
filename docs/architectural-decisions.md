@@ -2,7 +2,7 @@
 
 # Case Management Registry (CMR)
 
-Status: APPROVED BASELINE v1.0
+Status: APPROVED BASELINE v1.1
 
 ---
 
@@ -19,8 +19,9 @@ Each ADR captures:
 
 All future architectural changes should either:
 
-- Follow an existing ADR, or
-- Create a new ADR.
+- Follow an existing ADR
+- Amend an existing ADR
+- Create a new ADR
 
 ---
 
@@ -36,7 +37,7 @@ The Case Management Registry (CMR) shall be the authoritative System of Record f
 
 ### Context
 
-Workflow engines are optimized for workflow execution and not long-term business data management.
+Workflow engines are optimized for workflow orchestration and execution, not long-term business data ownership.
 
 ### Rationale
 
@@ -56,7 +57,7 @@ Benefits:
 - Workflow independence
 - Better search capabilities
 - Easier reporting
-- Easier migration between workflow engines
+- Easier workflow engine replacement
 
 ---
 
@@ -78,7 +79,7 @@ The platform should not become dependent on a single workflow engine implementat
 
 Workflow engines may change over time.
 
-The platform must remain independent.
+The platform must remain independent from workflow engine vendors.
 
 ### Initial Implementation
 
@@ -89,7 +90,7 @@ The platform must remain independent.
 - Camunda Adapter
 - Flowable Adapter
 - jBPM Adapter
-- Custom Adapters
+- Custom Workflow Adapters
 
 ### Consequences
 
@@ -111,37 +112,32 @@ Technology Stack Selection
 
 The platform shall use:
 
-Backend:
+### Backend
 
 - Python
 - FastAPI
 
-Frontend:
+### Frontend
 
 - Jinja2
 - HTMX
 
-Database:
+### Database
 
 - PostgreSQL
 
+### Forms
+
+- JSON Forms
+
 ### Context
 
-The platform requires rapid development, metadata-driven UI generation, and long-term maintainability.
+The platform requires:
 
-### Rationale
-
-FastAPI provides:
-
-- Excellent performance
-- Modern architecture
-- OpenAPI integration
-
-Jinja2 + HTMX provides:
-
+- Metadata-driven UI generation
 - Server-side rendering
-- Low complexity
-- Excellent metadata-driven rendering support
+- Long-term maintainability
+- Rapid application development
 
 ### Consequences
 
@@ -150,6 +146,7 @@ Benefits:
 - Reduced complexity
 - Faster development
 - Simpler deployment model
+- Strong metadata-driven architecture support
 
 ---
 
@@ -165,7 +162,7 @@ The platform shall be metadata-driven.
 
 ### Context
 
-Business Analysts need the ability to introduce new case types with minimal software development.
+Business Analysts require the ability to introduce new case types and behaviors with minimal software development.
 
 ### Rationale
 
@@ -177,6 +174,7 @@ Metadata shall define:
 - Lifecycles
 - Workflow Mappings
 - Validation Rules
+- UI Behavior Rules
 
 ### Consequences
 
@@ -202,20 +200,20 @@ Python extension points shall only be used when metadata cannot satisfy requirem
 
 ### Context
 
-A low-code platform still requires a controlled method for implementing advanced behavior.
+A low-code platform requires controlled extensibility.
 
 ### Rationale
 
 Most requirements should be solved through metadata.
 
-Complex requirements may use Python extensions.
+Advanced requirements may use Python extensions.
 
 ### Consequences
 
 Benefits:
 
 - Lower maintenance cost
-- Reduced custom coding
+- Reduced custom development
 - Flexible extensibility
 
 ---
@@ -293,11 +291,11 @@ Permission-Based UI Behavior
 
 ### Decision
 
-The platform shall support metadata-driven UI behavior control.
+The platform shall support metadata-driven UI behavior.
 
 ### Context
 
-Businesses require different levels of interaction for fields without introducing field-level security.
+Different users require different levels of interaction with fields without introducing field-level security.
 
 ### Rationale
 
@@ -311,23 +309,28 @@ Controls may be:
 - Optional
 - Disabled
 
-based on:
+Based on:
 
 - Platform Roles
 - Case Roles
 - Activities
 - Lifecycle Stages
+- REST Evaluation
+- Python Extension Points
 
 ### Architectural Rule
 
 UI behavior is not a security mechanism.
+
+Security remains enforced at the Case level.
 
 ### Consequences
 
 Benefits:
 
 - Rich user experiences
-- Simplified authorization model
+- Simpler authorization model
+- Highly configurable forms
 
 ---
 
@@ -343,7 +346,7 @@ Search results shall return Cases only.
 
 ### Context
 
-Returning activities, comments, attachments, and workflow artifacts increases complexity.
+Returning activities, comments, attachments, and workflow artifacts increases complexity and weakens the business-focused experience.
 
 ### Rationale
 
@@ -371,7 +374,7 @@ Search behavior shall be defined through metadata.
 
 ### Context
 
-New Case Types require different search experiences.
+Different Case Types require different search experiences.
 
 ### Rationale
 
@@ -381,14 +384,16 @@ Business Analysts should configure:
 - Filters
 - Result Columns
 - Sorting
+- Saved Searches
 
-without code changes.
+without software changes.
 
 ### Consequences
 
 Benefits:
 
 - Rapid onboarding of new case types
+- Low-code search customization
 
 ---
 
@@ -409,29 +414,6 @@ Different Case Types require different lifecycle models.
 ### Rationale
 
 Lifecycle behavior should not be hardcoded.
-
-### Examples
-
-Complaint Lifecycle
-
-```text
-Draft
-→ Submitted
-→ Investigation
-→ Resolved
-→ Closed
-```
-
-Change Request Lifecycle
-
-```text
-Draft
-→ Submitted
-→ Technical Review
-→ CAB Approval
-→ Implementation
-→ Closed
-```
 
 ### Consequences
 
@@ -462,7 +444,7 @@ A Case Type may define multiple form definitions.
 
 ### Context
 
-Different lifecycle stages require different user experiences.
+Different lifecycle stages and activities require different user experiences.
 
 ### Consequences
 
@@ -492,7 +474,8 @@ Government and enterprise services frequently require staged data collection.
 Benefits:
 
 - Better user experience
-- Reduced submission abandonment
+- Reduced abandonment rates
+- Easier information organization
 
 ---
 
@@ -508,25 +491,11 @@ The platform shall use a hybrid localization model.
 
 ### Application Translations
 
-Stored in translation files.
-
-Examples:
-
-- Save
-- Cancel
-- Search
-- Dashboard
+Stored in translation files under source control.
 
 ### Metadata Translations
 
 Stored within metadata definitions.
-
-Examples:
-
-- Case Types
-- Form Labels
-- Search Labels
-- Lifecycle Labels
 
 ### Context
 
@@ -538,6 +507,7 @@ Benefits:
 
 - Low-code localization
 - Easier administration
+- Better separation of concerns
 
 ---
 
@@ -564,8 +534,9 @@ The platform must support multilingual operation.
 
 Benefits:
 
-- Better internationalization support
+- Better internationalization
 - Better accessibility
+- Consistent user experience
 
 ---
 
@@ -599,7 +570,7 @@ Benefits:
 
 - Governance
 - Auditability
-- Change Control
+- Change control
 
 ---
 
@@ -623,6 +594,7 @@ Benefits:
 
 - Backward compatibility
 - Auditable history
+- Safe platform evolution
 
 ---
 
@@ -630,24 +602,26 @@ Benefits:
 
 ## Title
 
-Dynamic Business Rules Through REST
+Dynamic Business Rules and Extension Points
 
 ### Decision
 
-Metadata may invoke REST services for business rules.
+The platform shall support dynamic business rules through REST integrations and optional Python extension points.
 
 ### Supported Scenarios
 
 - Validation
-- Visibility
-- Read Only Rules
+- Visibility Rules
+- Read-Only Rules
 - Lookup Values
 - Eligibility Checks
 - Business Calculations
+- External Integrations
+- Data Enrichment
 
 ### Context
 
-Business logic often depends on external systems.
+Business behavior often depends on external systems and advanced logic.
 
 ### Consequences
 
@@ -655,6 +629,7 @@ Benefits:
 
 - Flexible integration
 - Reduced custom development
+- Strong extensibility model
 
 ---
 
@@ -688,6 +663,7 @@ Benefits:
 
 - Configurable integrations
 - Flexible automation
+- Reduced code dependencies
 
 ---
 
@@ -701,21 +677,17 @@ Authentication, Authorization, and Auditing Separation
 
 Authentication, Authorization, and Auditing shall remain independent concerns.
 
-### Context
-
-These responsibilities are frequently coupled incorrectly.
-
 ### Definitions
 
-Authentication:
+Authentication
 
 - Who the user is
 
-Authorization:
+Authorization
 
 - What the user may access
 
-Auditing:
+Auditing
 
 - What the user did
 
@@ -729,8 +701,147 @@ Benefits:
 
 ---
 
+# ADR-021
+
+## Title
+
+Business Terminology Model
+
+### Decision
+
+Business users shall interact with business terminology rather than workflow terminology.
+
+### Examples
+
+Business Terms:
+
+- Case
+- Activity
+- Participant
+- Stage
+- History
+
+Workflow Terms:
+
+- Process Instance
+- Task
+- Assignee
+- Execution
+- Runtime Variable
+
+### Context
+
+Workflow implementation details should remain hidden from business users.
+
+### Consequences
+
+Benefits:
+
+- Improved usability
+- Reduced BPM coupling
+- Better business alignment
+
+---
+
+# ADR-022
+
+## Title
+
+Workflow Engine Independence
+
+### Decision
+
+The platform shall remain independent from workflow engine implementations.
+
+Business services shall never directly invoke workflow engines.
+
+All workflow interactions shall occur through Workflow Adapters.
+
+### Context
+
+Long-term platform sustainability requires workflow vendor independence.
+
+### Consequences
+
+Benefits:
+
+- Architectural flexibility
+- Easier migration
+- Reduced vendor lock-in
+
+---
+
+# ADR-023
+
+## Title
+
+Metadata Localization Storage Strategy
+
+### Decision
+
+Metadata translations shall be stored as multilingual metadata values.
+
+Application translations shall remain in translation files.
+
+### Example
+
+```json
+{
+  "label": {
+    "en": "Request Title",
+    "ar": "عنوان الطلب"
+  }
+}
+```
+
+### Context
+
+Business terminology should be manageable by Business Analysts without deployment.
+
+### Consequences
+
+Benefits:
+
+- No schema changes for additional languages
+- Low-code localization
+- Metadata ownership by business users
+
+---
+
+# ADR-024
+
+## Title
+
+Metadata-Defined Business Objects
+
+### Decision
+
+The platform shall support metadata-defined business objects.
+
+### Examples
+
+- Complaint
+- Appeal
+- Change Request
+- NGO Request
+- Service Request
+
+### Context
+
+New business capabilities should be introduced through metadata whenever possible.
+
+### Consequences
+
+Benefits:
+
+- Faster onboarding of business services
+- Reduced development effort
+- Greater platform flexibility
+
+---
+
 # ADR Status
 
-Status: APPROVED BASELINE v1.0
+Status: APPROVED BASELINE v1.1
 
 This document shall be updated whenever a significant architectural decision is made.
