@@ -1,173 +1,103 @@
-# Architectural Decision Records (ADR)
+# Approved Architectural Decisions
 
 # Case Management Registry (CMR)
 
-Status: APPROVED BASELINE v1.1
+Status: APPROVED BASELINE v1.2
 
 ---
 
 # Purpose
 
-This document records significant architectural decisions made during the design and evolution of the Case Management Registry (CMR) platform.
+This document provides a concise summary of all approved architectural decisions governing the Case Management Registry (CMR) platform.
 
-Each ADR captures:
+Detailed rationale, context, and consequences are maintained in `architectural-decisions.md`.
 
-- Decision
-- Context
-- Rationale
-- Consequences
-
-All future architectural changes should either:
-
-- Follow an existing ADR
-- Amend an existing ADR
-- Create a new ADR
+This document serves as the quick-reference architecture baseline for Product Owners, Business Analysts, Architects, and Developers.
 
 ---
 
-# ADR-001
+## AD-001
 
-## Title
+### System of Record
 
-Case Management Registry as System of Record
+Case Management Registry (CMR) is the authoritative System of Record for all business case information.
 
-### Decision
-
-The Case Management Registry (CMR) shall be the authoritative System of Record for all business case information.
-
-### Context
-
-Workflow engines are optimized for workflow orchestration and execution, not long-term business data ownership.
-
-### Rationale
-
-CMR must own:
+CMR owns:
 
 - Case Data
 - Attachments
 - Access Control
 - Audit History
-- Search Metadata
 - Business Metadata
-
-### Consequences
-
-Benefits:
-
-- Workflow independence
-- Better search capabilities
-- Easier reporting
-- Easier workflow engine replacement
+- Search Metadata
 
 ---
 
-# ADR-002
+## AD-002
 
-## Title
+### Workflow Adapter Architecture
 
-Workflow Adapter Architecture
+All workflow operations must occur through a Workflow Adapter Layer.
 
-### Decision
+Direct workflow engine integration is prohibited.
 
-All workflow interactions shall occur through a Workflow Adapter Layer.
-
-### Context
-
-The platform should not become dependent on a single workflow engine implementation.
-
-### Rationale
-
-Workflow engines may change over time.
-
-The platform must remain independent from workflow engine vendors.
-
-### Initial Implementation
+Current implementation:
 
 - CIBSeven Adapter
 
-### Future Implementations
+Future implementations:
 
 - Camunda Adapter
 - Flowable Adapter
 - jBPM Adapter
-- Custom Workflow Adapters
-
-### Consequences
-
-Benefits:
-
-- Vendor independence
-- Easier migrations
-- Better testability
+- Custom Adapters
 
 ---
 
-# ADR-003
+## AD-003
 
-## Title
+### Workflow Engine Independence
 
-Technology Stack Selection
+The platform shall remain independent from workflow engine implementations.
 
-### Decision
+Workflow engines may be replaced without impacting business functionality.
 
-The platform shall use:
+---
 
-### Backend
+## AD-004
+
+### Technology Stack
+
+Backend:
 
 - Python
 - FastAPI
 
-### Frontend
+Frontend:
 
 - Jinja2
 - HTMX
 
-### Database
+Database:
 
 - PostgreSQL
 
-### Forms
+Forms:
 
 - JSON Forms
 
-### Context
-
-The platform requires:
-
-- Metadata-driven UI generation
-- Server-side rendering
-- Long-term maintainability
-- Rapid application development
-
-### Consequences
-
-Benefits:
-
-- Reduced complexity
-- Faster development
-- Simpler deployment model
-- Strong metadata-driven architecture support
-
 ---
 
-# ADR-004
+## AD-005
 
-## Title
-
-Metadata-Driven Architecture
-
-### Decision
+### Metadata-Driven Architecture
 
 The platform shall be metadata-driven.
 
-### Context
+Metadata defines:
 
-Business Analysts require the ability to introduce new case types and behaviors with minimal software development.
-
-### Rationale
-
-Metadata shall define:
-
+- Business Objects
+- Case Types
 - Forms
 - Searches
 - Detail Views
@@ -176,265 +106,41 @@ Metadata shall define:
 - Validation Rules
 - UI Behavior Rules
 
-### Consequences
+---
 
-Benefits:
+## AD-006
 
-- Faster delivery
-- Reduced coding effort
-- Increased flexibility
+### Configuration First
+
+Configuration is preferred over code.
+
+Custom Python extensions shall only be used when metadata cannot reasonably satisfy a requirement.
 
 ---
 
-# ADR-005
+## AD-007
 
-## Title
+### Metadata-Defined Business Objects
 
-Configuration First, Extension Second
+New business objects shall be defined through metadata.
 
-### Decision
+Examples:
 
-Configuration shall be preferred over custom development.
-
-Python extension points shall only be used when metadata cannot satisfy requirements.
-
-### Context
-
-A low-code platform requires controlled extensibility.
-
-### Rationale
-
-Most requirements should be solved through metadata.
-
-Advanced requirements may use Python extensions.
-
-### Consequences
-
-Benefits:
-
-- Lower maintenance cost
-- Reduced custom development
-- Flexible extensibility
+- Complaint
+- Appeal
+- Change Request
+- NGO Request
+- Service Request
 
 ---
 
-# ADR-006
+## AD-008
 
-## Title
+### Multiple Form Variants
 
-Explicit Case Access Model
+A Case Type may define multiple forms.
 
-### Decision
-
-Case visibility shall be managed through explicit access assignments.
-
-### Context
-
-Workflow history does not reliably determine who should continue seeing a case.
-
-### Rationale
-
-Access control must remain independent from workflow execution.
-
-### Consequences
-
-Benefits:
-
-- Predictable authorization
-- Easier search security
-- Better auditing
-
----
-
-# ADR-007
-
-## Title
-
-No Field-Level Security in Phase 1
-
-### Decision
-
-Security shall be enforced at the Case level.
-
-Field-level security shall not be implemented in Phase 1.
-
-### Context
-
-Field-level security significantly increases complexity.
-
-### Rationale
-
-The initial platform should focus on reliable case-level authorization.
-
-Future compliance requirements may introduce:
-
-- Field-Level Security
-- Data Masking
-- ABAC
-- GDPR Controls
-
-### Consequences
-
-Benefits:
-
-- Simpler architecture
-- Simpler metadata model
-- Simpler search implementation
-
----
-
-# ADR-008
-
-## Title
-
-Permission-Based UI Behavior
-
-### Decision
-
-The platform shall support metadata-driven UI behavior.
-
-### Context
-
-Different users require different levels of interaction with fields without introducing field-level security.
-
-### Rationale
-
-Controls may be:
-
-- Visible
-- Hidden
-- Editable
-- Read Only
-- Required
-- Optional
-- Disabled
-
-Based on:
-
-- Platform Roles
-- Case Roles
-- Activities
-- Lifecycle Stages
-- REST Evaluation
-- Python Extension Points
-
-### Architectural Rule
-
-UI behavior is not a security mechanism.
-
-Security remains enforced at the Case level.
-
-### Consequences
-
-Benefits:
-
-- Rich user experiences
-- Simpler authorization model
-- Highly configurable forms
-
----
-
-# ADR-009
-
-## Title
-
-Search Returns Cases Only
-
-### Decision
-
-Search results shall return Cases only.
-
-### Context
-
-Returning activities, comments, attachments, and workflow artifacts increases complexity and weakens the business-focused experience.
-
-### Rationale
-
-Users work with Cases as the primary business object.
-
-### Consequences
-
-Benefits:
-
-- Simpler search experience
-- Consistent terminology
-- Better security enforcement
-
----
-
-# ADR-010
-
-## Title
-
-Metadata-Driven Search
-
-### Decision
-
-Search behavior shall be defined through metadata.
-
-### Context
-
-Different Case Types require different search experiences.
-
-### Rationale
-
-Business Analysts should configure:
-
-- Search Fields
-- Filters
-- Result Columns
-- Sorting
-- Saved Searches
-
-without software changes.
-
-### Consequences
-
-Benefits:
-
-- Rapid onboarding of new case types
-- Low-code search customization
-
----
-
-# ADR-011
-
-## Title
-
-Lifecycle Definitions Managed Through Metadata
-
-### Decision
-
-Lifecycle behavior shall be configured through metadata.
-
-### Context
-
-Different Case Types require different lifecycle models.
-
-### Rationale
-
-Lifecycle behavior should not be hardcoded.
-
-### Consequences
-
-Benefits:
-
-- Flexible lifecycle design
-- Business Analyst ownership
-
----
-
-# ADR-012
-
-## Title
-
-Multiple Form Variants Per Case Type
-
-### Decision
-
-A Case Type may define multiple form definitions.
-
-### Supported Forms
+Supported forms:
 
 - Create Form
 - Edit Form
@@ -442,115 +148,39 @@ A Case Type may define multiple form definitions.
 - Activity Form
 - Closure Form
 
-### Context
+---
 
-Different lifecycle stages and activities require different user experiences.
+## AD-009
 
-### Consequences
+### Multi-Step Forms
 
-Benefits:
+The platform shall support metadata-driven wizard-style forms.
 
-- Better usability
-- Better workflow integration
+Supported capabilities:
+
+- Save Draft
+- Resume Later
+- Conditional Steps
+- Step Validation
+- Review Screen
 
 ---
 
-# ADR-013
+## AD-010
 
-## Title
+### Metadata Versioning
 
-Multi-Step Forms
+All metadata definitions shall support versioning.
 
-### Decision
-
-The platform shall support metadata-driven multi-step forms.
-
-### Context
-
-Government and enterprise services frequently require staged data collection.
-
-### Consequences
-
-Benefits:
-
-- Better user experience
-- Reduced abandonment rates
-- Easier information organization
+Existing cases remain linked to the metadata version used at creation time.
 
 ---
 
-# ADR-014
+## AD-011
 
-## Title
+### Metadata Governance
 
-Hybrid Localization Strategy
-
-### Decision
-
-The platform shall use a hybrid localization model.
-
-### Application Translations
-
-Stored in translation files under source control.
-
-### Metadata Translations
-
-Stored within metadata definitions.
-
-### Context
-
-Business terminology must be editable without software deployment.
-
-### Consequences
-
-Benefits:
-
-- Low-code localization
-- Easier administration
-- Better separation of concerns
-
----
-
-# ADR-015
-
-## Title
-
-RTL and LTR Support
-
-### Decision
-
-The platform shall dynamically adapt to the writing direction of the active language.
-
-### Supported Directions
-
-- RTL
-- LTR
-
-### Context
-
-The platform must support multilingual operation.
-
-### Consequences
-
-Benefits:
-
-- Better internationalization
-- Better accessibility
-- Consistent user experience
-
----
-
-# ADR-016
-
-## Title
-
-Metadata Governance Lifecycle
-
-### Decision
-
-Metadata definitions shall follow a governance lifecycle.
-
-### Lifecycle
+Metadata definitions shall follow a controlled lifecycle:
 
 ```text
 Draft
@@ -560,90 +190,155 @@ Draft
 → Retired
 ```
 
-### Context
-
-Uncontrolled metadata changes introduce operational risk.
-
-### Consequences
-
-Benefits:
-
-- Governance
-- Auditability
-- Change control
+Only Published metadata may be used in production.
 
 ---
 
-# ADR-017
+## AD-012
 
-## Title
+### Lifecycle Definitions
 
-Metadata Versioning
+Lifecycle behavior shall be metadata-driven.
 
-### Decision
+Different Case Types may have different lifecycles.
 
-All metadata definitions shall support versioning.
-
-### Context
-
-Existing cases must continue functioning after metadata changes.
-
-### Consequences
-
-Benefits:
-
-- Backward compatibility
-- Auditable history
-- Safe platform evolution
+Lifecycle behavior shall not be hardcoded.
 
 ---
 
-# ADR-018
+## AD-013
 
-## Title
+### Metadata-Driven Search
 
-Dynamic Business Rules and Extension Points
+Search behavior shall be defined through metadata.
 
-### Decision
+Business Analysts may configure:
 
-The platform shall support dynamic business rules through REST integrations and optional Python extension points.
+- Search Fields
+- Filters
+- Result Columns
+- Sorting
+- Saved Searches
 
-### Supported Scenarios
+---
+
+## AD-014
+
+### Search Returns Cases Only
+
+Search results shall return Cases only.
+
+Search results shall not directly return:
+
+- Activities
+- Attachments
+- Comments
+- Workflow Artifacts
+
+---
+
+## AD-015
+
+### Explicit Case Access Model
+
+Case visibility shall be managed through explicit access assignments.
+
+Visibility shall not depend on workflow history alone.
+
+---
+
+## AD-016
+
+### No Field-Level Security (Phase 1)
+
+Security shall be enforced at the Case level.
+
+Field-level security is excluded from Phase 1.
+
+Potential future enhancements:
+
+- Data Masking
+- ABAC
+- GDPR Controls
+- Field-Level Security
+
+---
+
+## AD-017
+
+### Permission-Based UI Behavior
+
+The platform shall support metadata-driven UI behavior.
+
+Supported behaviors:
+
+- Visible
+- Hidden
+- Editable
+- Read Only
+- Required
+- Optional
+- Disabled
+
+Behavior may be based on:
+
+- Platform Roles
+- Case Roles
+- Activities
+- Lifecycle Stages
+- REST Rules
+- Python Extensions
+
+UI behavior is not a security mechanism.
+
+---
+
+## AD-018
+
+### Dynamic Business Rules
+
+Metadata may invoke REST services for:
 
 - Validation
-- Visibility Rules
+- Visibility
 - Read-Only Rules
-- Lookup Values
+- Dynamic Dropdowns
+- Hyperlinks
 - Eligibility Checks
 - Business Calculations
-- External Integrations
-- Data Enrichment
-
-### Context
-
-Business behavior often depends on external systems and advanced logic.
-
-### Consequences
-
-Benefits:
-
-- Flexible integration
-- Reduced custom development
-- Strong extensibility model
 
 ---
 
-# ADR-019
+## AD-019
 
-## Title
+### Python Extension Points
 
-Workflow Events
+Metadata may reference optional Python handlers for advanced requirements.
 
-### Decision
+Examples:
 
-Metadata shall support workflow and form lifecycle events.
+- Complex Business Rules
+- External Integrations
+- Data Enrichment
+- Eligibility Validation
 
-### Supported Events
+Principle:
+
+```text
+Metadata First
++
+Optional Extension Points
+```
+
+---
+
+## AD-020
+
+### Workflow Events
+
+Metadata shall support lifecycle events.
+
+Supported events:
 
 - Form Load
 - Step Enter
@@ -657,133 +352,71 @@ Metadata shall support workflow and form lifecycle events.
 - Before Complete Activity
 - After Complete Activity
 
-### Consequences
-
-Benefits:
-
-- Configurable integrations
-- Flexible automation
-- Reduced code dependencies
-
 ---
 
-# ADR-020
+## AD-021
 
-## Title
+### Business Terminology Model
 
-Authentication, Authorization, and Auditing Separation
+Business users interact with:
 
-### Decision
-
-Authentication, Authorization, and Auditing shall remain independent concerns.
-
-### Definitions
-
-Authentication
-
-- Who the user is
-
-Authorization
-
-- What the user may access
-
-Auditing
-
-- What the user did
-
-### Consequences
-
-Benefits:
-
-- Cleaner architecture
-- Easier compliance
-- Better governance
-
----
-
-# ADR-021
-
-## Title
-
-Business Terminology Model
-
-### Decision
-
-Business users shall interact with business terminology rather than workflow terminology.
-
-### Examples
-
-Business Terms:
-
-- Case
-- Activity
-- Participant
-- Stage
+- Cases
+- Activities
+- Participants
+- Stages
 - History
 
-Workflow Terms:
+Business users do not interact with workflow terminology.
 
-- Process Instance
-- Task
-- Assignee
-- Execution
-- Runtime Variable
+Examples:
 
-### Context
+```text
+Case
+instead of
+Process Instance
+```
 
-Workflow implementation details should remain hidden from business users.
-
-### Consequences
-
-Benefits:
-
-- Improved usability
-- Reduced BPM coupling
-- Better business alignment
+```text
+Activity
+instead of
+Task
+```
 
 ---
 
-# ADR-022
+## AD-022
 
-## Title
+### Hybrid Localization Strategy
 
-Workflow Engine Independence
+Application translations shall be stored in translation files.
 
-### Decision
+Examples:
 
-The platform shall remain independent from workflow engine implementations.
+- Menus
+- Buttons
+- Navigation
+- System Messages
 
-Business services shall never directly invoke workflow engines.
+Metadata translations shall be stored within metadata definitions.
 
-All workflow interactions shall occur through Workflow Adapters.
+Examples:
 
-### Context
-
-Long-term platform sustainability requires workflow vendor independence.
-
-### Consequences
-
-Benefits:
-
-- Architectural flexibility
-- Easier migration
-- Reduced vendor lock-in
+- Case Types
+- Field Labels
+- Search Labels
+- Lifecycle Labels
+- Activity Labels
+- Notification Templates
 
 ---
 
-# ADR-023
+## AD-023
 
-## Title
-
-Metadata Localization Storage Strategy
-
-### Decision
+### Metadata Localization Storage
 
 Metadata translations shall be stored as multilingual metadata values.
 
-Application translations shall remain in translation files.
-
-### Example
+Example:
 
 ```json
 {
@@ -794,54 +427,58 @@ Application translations shall remain in translation files.
 }
 ```
 
-### Context
-
-Business terminology should be manageable by Business Analysts without deployment.
-
-### Consequences
-
-Benefits:
-
-- No schema changes for additional languages
-- Low-code localization
-- Metadata ownership by business users
+Additional languages shall not require schema changes.
 
 ---
 
-# ADR-024
+## AD-024
 
-## Title
+### Bidirectional Language Support
 
-Metadata-Defined Business Objects
+The platform shall automatically adapt to:
 
-### Decision
+- RTL languages
+- LTR languages
 
-The platform shall support metadata-defined business objects.
+based on the active user language.
 
-### Examples
+Initial languages:
 
-- Complaint
-- Appeal
-- Change Request
-- NGO Request
-- Service Request
-
-### Context
-
-New business capabilities should be introduced through metadata whenever possible.
-
-### Consequences
-
-Benefits:
-
-- Faster onboarding of business services
-- Reduced development effort
-- Greater platform flexibility
+- Arabic
+- English
 
 ---
 
-# ADR Status
+## AD-025
 
-Status: APPROVED BASELINE v1.1
+### Authentication, Authorization and Auditing Separation
 
-This document shall be updated whenever a significant architectural decision is made.
+Authentication determines:
+
+- Who the user is
+
+Authorization determines:
+
+- What the user can access
+
+Auditing records:
+
+- What the user did
+
+These concerns shall remain independent throughout the architecture.
+
+---
+
+# Baseline Status
+
+Status: APPROVED BASELINE v1.2
+
+This document is derived from the following frozen documents:
+
+- README.md
+- product-requirements-document.md
+- solution-architecture.md
+- security-and-access-model.md
+- search-requirements.md
+- metadata-model.md v1.2
+- architectural-decisions.md v1.1
