@@ -1,0 +1,31 @@
+# Enterprise BPM Portal Architecture
+
+## Stack
+- FastAPI
+- Jinja2
+- HTMX
+- Bootstrap 5
+- PostgreSQL
+- CIBSeven (Or Any Camunda7 Forked Engines) REST API
+- Keycloak
+- Internationalization (Arabic/English)
+
+## Principle
+CIBSeven (Or Any Camunda 7 Forked Engines) is the workflow engine.
+The portal is the business application.
+
+## Responsibilities
+### Portal
+- Request creation
+- Task inbox
+- Search
+- Reporting
+- Attachments
+- Dashboards
+
+### CIBSeven (or Any Camunda 7 Forked Engines)
+- Workflow orchestration
+- Timers
+- Escalations
+- Task assignment
+- Process history
