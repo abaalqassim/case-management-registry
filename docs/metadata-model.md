@@ -222,7 +222,113 @@ Supported Field Types:
 Additional field types may be introduced in future releases.
 
 ---
+## Field Behavior Definition
 
+Defines how a field behaves within the user interface.
+
+Field behavior is independent of security.
+
+Field behavior controls user interaction while security controls access to the case itself.
+
+Supported Behaviors:
+
+- Visible
+- Hidden
+- Editable
+- Read Only
+- Required
+- Optional
+- Disabled
+
+Behavior rules may be based on:
+
+- Platform Role
+- Case Role
+- Activity
+- Lifecycle Stage
+- Metadata Rules
+- REST Evaluation
+- Python Extension Points
+
+Example:
+
+```json
+{
+  "field": "budgetAmount",
+  "behavior": {
+    "caseRoles": {
+      "requester": "readonly",
+      "manager": "editable"
+    }
+  }
+}
+```
+
+---
+
+### Activity-Based Behavior
+
+Example:
+
+```json
+{
+  "field": "approvalComment",
+  "behavior": {
+    "activities": {
+      "technical-review": "readonly",
+      "manager-approval": "editable"
+    }
+  }
+}
+```
+
+---
+
+### Lifecycle-Based Behavior
+
+Example:
+
+```json
+{
+  "field": "requestTitle",
+  "behavior": {
+    "stages": {
+      "draft": "editable",
+      "submitted": "readonly",
+      "completed": "readonly"
+    }
+  }
+}
+```
+
+---
+
+### Dynamic Behavior
+
+Behavior rules may be determined through REST integrations.
+
+Example:
+
+```json
+{
+  "field": "budgetAmount",
+  "behavior": {
+    "type": "rest",
+    "endpoint": "/api/rules/field-behavior"
+  }
+}
+```
+
+---
+
+### Architectural Rule
+
+Field behavior shall not be considered a security mechanism.
+
+Users with access to a case may still access case data according to the platform's security model.
+
+Field behavior only controls presentation and interaction within generated forms.
+---
 ## Form Definition
 
 Defines data entry screens.
