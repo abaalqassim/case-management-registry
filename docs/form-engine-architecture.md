@@ -1,252 +1,790 @@
-# Form Engine Architecture (Frozen)
+# Form Engine Architecture
 
-**Status:** APPROVED
+# Case Management Registry (CMR)
 
-**Depends On:**
-- Metadata Model v2
-- Logical Domain Model
-- Physical Data Model
-- AD-08 Metadata-Driven Platform
-- AD-09 Event-Driven Runtime
-- AD-10 Hybrid Storage Model
+Status: APPROVED ARCHITECTURE BASELINE v1.0
 
 ---
 
-# 1. Purpose
+# Document Purpose
 
-The Form Engine is responsible for rendering, validating, persisting, and executing metadata-driven forms without requiring new application code.
+This document defines the architecture of the Form Engine used by the Case Management Registry (CMR).
+
+The Form Engine is responsible for transforming metadata definitions into runtime user experiences.
+
+The Form Engine serves as the foundation for:
+
+- Create Forms
+- Edit Forms
+- View Forms
+- Activity Forms
+- Closure Forms
+- Multi-Step Forms
+
+The engine is metadata-driven and generates user interfaces without requiring custom application development.
+
+---
+
+# Architectural Principles
+
+## Metadata Driven
+
+The Form Engine shall generate forms from metadata.
+
+Application code shall not be required when creating new form definitions.
+
+The Form Engine shall interpret metadata as the authoritative source of form behavior.
+
+---
+
+## Separation of Concerns
+
+The Form Engine is responsible for:
+
+- Rendering
+- Validation
+- UI Behavior
+- Data Collection
+
+The Workflow Adapter Layer is responsible for:
+
+- Workflow Communication
+- Activity Completion
+- Workflow Events
+
+The Security Model is responsible for:
+
+- Authentication
+- Authorization
+- Case Visibility
+
+---
+
+## Configuration Before Customization
+
+Metadata shall be the preferred mechanism for defining behavior.
+
+Python extensions shall only be introduced when metadata cannot satisfy a requirement.
+
+---
+
+## Version Preservation
+
+Forms shall be versioned.
+
+Existing cases shall continue to use the form version active at creation time.
+
+New cases shall use the currently published version.
+
+---
+
+# Form Engine Responsibilities
 
 The Form Engine shall support:
 
-- Single-step forms
-- Multi-step forms
-- Task forms
-- Request forms
-- Read-only detail views
-- Dynamic validations
-- Dynamic business rules
-- REST integrations
-- Internationalization
-- RTL/LTR rendering
+- Dynamic Form Rendering
+- Dynamic Validation
+- Localization
+- Layout Management
+- Multi-Step Navigation
+- Draft Management
+- Activity Forms
+- UI Behavior Rules
+- Workflow Event Handling
+- Attachment Management
 
 ---
 
-# 2. Architectural Principles
+# Technology Architecture
 
-## 2.1 Metadata Driven
+## Rendering Layer
 
-No business form shall require a dedicated HTML template.
+The rendering layer shall use:
 
-Forms are generated dynamically from metadata definitions.
-
-## 2.2 Event Driven
-
-Forms react to lifecycle events and trigger behaviors through configured metadata.
-
-## 2.3 Workflow Independent
-
-The Form Engine shall not contain BPM vendor-specific logic.
-
-Integration must occur only through the Workflow Adapter Layer.
-
-## 2.4 API First
-
-Business rules and dynamic behavior shall be executed through REST APIs.
+- Jinja2
+- HTMX
+- JSON Forms Metadata
 
 ---
 
-# 3. High-Level Architecture
+## Form Metadata Provider
+
+The Form Engine obtains metadata from:
+
+- Metadata Repository
+- Metadata API
+- Metadata Cache
+
+The metadata version must be resolved before rendering.
+
+---
+
+## Runtime Architecture
 
 ```text
-Browser
-    |
-HTMX + Bootstrap
-    |
-Form Runtime Controller
-    |
-Form Engine
-    |
-+-------------------+
-| Metadata Service  |
-| Rules Engine      |
-| Validation Engine |
-| Workflow Adapter  |
-+-------------------+
-    |
-PostgreSQL
++----------------------------+
+|      Metadata Store        |
++-------------+--------------+
+              |
+              v
++----------------------------+
+|    Form Metadata Loader    |
++-------------+--------------+
+              |
+              v
++----------------------------+
+|      Form Engine           |
++-------------+--------------+
+              |
+     +--------+--------+
+     |                 |
+     v                 v
+Validation      UI Behavior
+     |                 |
+     +--------+--------+
+              |
+              v
++----------------------------+
+|      Jinja2 + HTMX         |
++----------------------------+
 ```
 
 ---
 
-# 4. Core Components
+# Form Types
 
-- Form Definition Service
-- Runtime Renderer
-- Layout Engine
-- Multi-Step Engine
-- Validation Engine
-- Rules Engine
-- Draft Management
-- Workflow Adapter
+## Create Form
 
----
-
-# 5. Multi-Step Form Engine
+Used to create new cases.
 
 Capabilities:
 
-- Previous Step
-- Next Step
+- Draft Support
+- Validation
+- Submission
+- Attachment Upload
+
+---
+
+## Edit Form
+
+Used to modify case data.
+
+Capabilities:
+
+- Validation
+- Attachment Management
+- Audit Tracking
+
+---
+
+## View Form
+
+Read-only representation of case information.
+
+Capabilities:
+
+- Data Display
+- Timeline Access
+- Attachment Access
+
+---
+
+## Activity Form
+
+Used during workflow execution.
+
+Examples:
+
+- Technical Review
+- Manager Approval
+- Investigation
+- Verification
+
+Activity forms may differ from the original create form.
+
+---
+
+## Closure Form
+
+Used when finalizing a case.
+
+Capabilities:
+
+- Resolution Information
+- Closure Comments
+- Final Attachments
+
+---
+
+# Form Definition Structure
+
+A form definition contains:
+
+- Metadata Identity
+- Version
+- Layout
+- Sections
+- Fields
+- Validation Rules
+- Behavior Rules
+- Events
+
+Example:
+
+```json
+{
+  "id": "complaint-create-form",
+  "version": 3
+}
+```
+
+---
+
+# Metadata References
+
+All metadata references shall use:
+
+```json
+{
+  "id": "complaint-create-form",
+  "version": 3
+}
+```
+
+Metadata references shall not embed versions inside identifiers.
+
+Example:
+
+✅ Correct
+
+```json
+{
+  "id": "complaint-create-form",
+  "version": 3
+}
+```
+
+❌ Incorrect
+
+```json
+{
+  "form": "complaint-create-form-v3"
+}
+```
+
+---
+
+# Layout Architecture
+
+Supported layouts include:
+
+- Single Column
+- Two Column
+- Three Column
+- Tabbed Layout
+- Wizard Layout
+
+Layout behavior shall be metadata-driven.
+
+---
+
+# Sections
+
+Sections group related fields.
+
+Examples:
+
+- Applicant Information
+- Request Information
+- Organization Information
+- Attachments
+
+Sections support:
+
+- Order
+- Visibility Rules
+- Localization
+- Dynamic Behavior
+
+---
+
+# Field Rendering
+
+The engine shall select a renderer based on field type.
+
+Example:
+
+```text
+string      → Text Input
+date        → Date Picker
+boolean     → Checkbox
+attachment  → File Upload
+```
+
+---
+
+# Supported Field Types
+
+- string
+- text
+- integer
+- decimal
+- currency
+- boolean
+- date
+- datetime
+- select
+- multiselect
+- user
+- department
+- email
+- phone
+- url
+- richtext
+- attachment
+
+---
+
+# Form Lifecycle
+
+## Load
+
+Metadata is loaded.
+
+Localization is applied.
+
+Behavior rules are evaluated.
+
+---
+
+## Render
+
+Controls are generated.
+
+UI behavior is applied.
+
+Visibility rules are evaluated.
+
+---
+
+## Validate
+
+Client-side validation executes.
+
+Server-side validation executes.
+
+Server-side validation remains authoritative.
+
+---
+
+## Save
+
+Data is persisted.
+
+Drafts may be created.
+
+Events may execute.
+
+---
+
+## Submit
+
+Form data is finalized.
+
+Workflow integration may occur.
+
+Events may execute.
+
+---
+
+# Multi-Step Forms
+
+The platform shall support wizard-style forms.
+
+Capabilities:
+
+- Previous
+- Next
 - Save Draft
 - Resume Later
-- Review Page
-- Conditional Navigation
-- Step Completion Status
+- Validation Per Step
+- Review Step
+- Conditional Steps
+
+Example:
+
+```text
+Step 1: Applicant
+Step 2: Details
+Step 3: Attachments
+Step 4: Review
+```
 
 ---
 
-# 6. Event Model
+# Draft Management
 
-Supported Events:
+Users may save drafts.
 
-- onLoad
-- onFieldChange
-- onFieldBlur
-- onStepEnter
-- onStepExit
-- beforeSave
-- afterSave
-- beforeSubmit
-- afterSubmit
-- beforeTaskComplete
-- afterTaskComplete
+Drafts shall preserve:
+
+- Form Data
+- Current Step
+- Metadata Version
+
+Drafts shall be recoverable.
 
 ---
 
-# 7. Validation Engine
+# Validation Architecture
 
-Supported:
+## Static Validation
+
+Examples:
 
 - Required
 - Length
-- Pattern
 - Range
-- Cross Field
-- REST Validation
+- Pattern
 
 ---
 
-# 8. Rules Engine
+## Cross-Field Validation
 
-Supported:
-
-- Visibility
-- Enablement
-- Read Only
-- Calculations
-- Hyperlinks
-- Lookups
-
----
-
-# 9. Dynamic Data Sources
-
-- Static Lists
-- Database Queries
-- REST APIs
-- Workflow Variables
-
----
-
-# 10. Draft Management
-
-Storage Table:
+Examples:
 
 ```text
-bo_draft
+Start Date < End Date
 ```
 
-Features:
+---
 
-- Auto Save
-- Manual Save
-- Resume Later
+## Dynamic Validation
+
+Validation may execute through REST integrations.
+
+Example:
+
+```json
+{
+  "type": "rest",
+  "endpoint": "/api/validation/request"
+}
+```
 
 ---
 
-# 11. Security Model
+# Permission-Based UI Behavior
 
-- Role Security
-- Field Security
-- Row-Level Security
-- JSONB Security
+The Form Engine shall support metadata-driven UI behavior.
 
----
+UI behavior controls how controls are presented and interacted with.
 
-# 12. Localization Model
+UI behavior does not provide security.
 
-Supported:
-
-- Arabic (RTL)
-- English (LTR)
+Security remains enforced at the Case level.
 
 ---
 
-# 13. Attachment Framework
+## Supported Behavior Modes
 
-- Upload
+- Visible
+- Hidden
+- Editable
+- Read Only
+- Required
+- Optional
+- Disabled
+
+---
+
+## Behavior Sources
+
+Behavior rules may be evaluated from:
+
+- Platform Roles
+- Case Roles
+- Workflow Activities
+- Lifecycle Stages
+- Metadata Rules
+- REST Services
+- Python Extensions
+
+---
+
+## Role-Based Example
+
+```json
+{
+  "field": "budgetAmount",
+  "behavior": {
+    "caseRoles": {
+      "manager": "editable",
+      "requester": "readonly"
+    }
+  }
+}
+```
+
+---
+
+## Activity-Based Example
+
+```json
+{
+  "field": "approvalRemarks",
+  "behavior": {
+    "activities": {
+      "technical-review": "readonly",
+      "manager-approval": "editable"
+    }
+  }
+}
+```
+
+---
+
+## Lifecycle Example
+
+```json
+{
+  "field": "requestTitle",
+  "behavior": {
+    "stages": {
+      "draft": "editable",
+      "submitted": "readonly",
+      "completed": "readonly"
+    }
+  }
+}
+```
+
+---
+
+## Dynamic Behavior Example
+
+```json
+{
+  "field": "budgetAmount",
+  "behavior": {
+    "type": "rest",
+    "endpoint": "/api/rules/field-behavior"
+  }
+}
+```
+
+---
+
+## Rule Evaluation Order
+
+The Form Engine shall evaluate behavior rules in the following order:
+
+1. Static Metadata Rules
+2. Lifecycle Rules
+3. Activity Rules
+4. Role Rules
+5. REST Rules
+6. Python Extensions
+
+The most restrictive rule shall take precedence.
+
+---
+
+# Dynamic Dropdowns
+
+Dropdown values may originate from:
+
+- Static Metadata
+- Reference Data
+- REST Services
+
+Example:
+
+```json
+{
+  "datasource": {
+    "type": "rest",
+    "endpoint": "/api/departments"
+  }
+}
+```
+
+---
+
+# Dynamic Visibility
+
+Visibility may be controlled by:
+
+- Metadata Rules
+- Field Values
+- REST Rules
+- Python Extensions
+
+---
+
+# File Upload Architecture
+
+The Form Engine shall support:
+
+- Single File Upload
+- Multiple File Upload
 - Download
 - Preview
-- Versioning
-- Virus Scanning
+- Validation
+- Auditing
 
-Storage:
+Supported validations:
 
-```text
-Object Storage
-```
+- File Size
+- File Type
+- Virus Scanning Integration
 
 ---
 
-# 14. Workflow Integration
+# Workflow Integration
 
-Workflow Adapter Operations:
+The Form Engine shall integrate through Workflow Adapters.
+
+The Form Engine shall never directly invoke workflow engine APIs.
+
+Supported functions:
 
 - Start Workflow
-- Load Task
-- Complete Task
-- Retrieve Workflow State
-
-Targets:
-
-- Camunda 7 Forked BPM Engines
-- Future Workflow Engines
+- Complete Activity
+- Update Variables
+- Synchronize Status
 
 ---
 
-# 15. Audit Integration
+# Workflow Events
 
-Audited Events:
+Supported events:
 
-- Open Form
+- Form Load
+- Step Enter
+- Step Exit
+- Before Save
+- After Save
+- Before Submit
+- After Submit
+- Before Start Workflow
+- After Start Workflow
+- Before Complete Activity
+- After Complete Activity
+
+---
+
+# Event Execution
+
+Events may execute:
+
+- REST Integrations
+- Notifications
+- Validation Logic
+- Synchronization Logic
+- Python Extensions
+
+---
+
+# Localization Architecture
+
+The Form Engine shall support multilingual rendering.
+
+Initial languages:
+
+- Arabic
+- English
+
+The Form Engine shall automatically adapt to:
+
+- RTL Languages
+- LTR Languages
+
+Metadata labels shall be resolved using the active language.
+
+---
+
+# Metadata Version Resolution
+
+Before rendering a form, the engine shall resolve:
+
+- Form Version
+- Field Versions
+- Validation Rules
+- Lifecycle Version
+
+The version used shall be recorded for auditing purposes.
+
+---
+
+# Auditing Requirements
+
+The Form Engine shall audit:
+
+- Form Open
 - Save Draft
 - Submit
-- Approve
-- Reject
-- Upload File
+- Activity Completion
+- Validation Failures
+- Attachment Uploads
+
+Audit records shall include:
+
+- User
+- Timestamp
+- Case
+- Form Version
+- Action
 
 ---
 
-# 16. Future Low-Code Capabilities
+# Error Handling
 
-- Form Designer
-- Rule Designer
-- Workflow Binding Designer
-- Reusable Components
-- Form Publishing Workflow
+The Form Engine shall provide graceful handling for:
+
+- Missing Metadata
+- Invalid Metadata
+- Validation Errors
+- Integration Failures
+- Workflow Failures
+
+Metadata errors shall not expose internal implementation details.
 
 ---
 
-# 17. Target Outcome
+# Extensibility
 
-Business Analysts shall be able to create forms, workflows, validations, dynamic behaviors, and localization resources through metadata without application development.
+The Form Engine shall support extension through:
+
+- Metadata
+- REST Integrations
+- Python Extension Points
+- Additional Control Types
+- Additional Layout Types
+
+---
+
+# Architectural Constraints
+
+- Form behavior must be metadata-driven.
+- Form rendering must remain workflow-engine independent.
+- Security remains Case-based.
+- UI behavior is not security.
+- Metadata versions are immutable after publication.
+- Workflow interactions must occur through adapters.
+
+---
+
+# Form Engine Status
+
+Status: APPROVED ARCHITECTURE BASELINE v1.0
+
+This document serves as the foundation for:
+
+- Metadata Designer
+- Runtime Renderer
+- Workflow Activity Screens
+- Dynamic Validation Framework
+- Logical Domain Model
+- PostgreSQL Schema Design
